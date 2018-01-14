@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+  <title>test</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <style>
+    .list {
+      font-size: 9px;
+      line-height: 9px;
+    }
+  </style>
+</head>
+<body>
+  <button onclick="toggleSpeed();">toggle speed</button>
+  <div class="list"></div>
+
+  <script>
+    const LIST_MAX_COUNT = 100;
+
+    const socket = io();
+    let list = [];
+
+    socket.on('list', (newList) => {
+    	const sortedNewList = newList.sort((a, b) => (a.timestamp < b.timestamp ? -1 : 1));
+
+    	list = sortedNewList.concat(list).slice(0, LIST_MAX_COUNT);
+
+    	renderList(list);
+    });
+
+    function renderList(data) {
+    	d3.select('div.list')
+        .selectAll('div')
+        .data(data)
+        .text((d) => (d.value))
+        .enter().append('div')
+        .text((d) => (d.value))
+    }
+
+    function toggleSpeed() {
+    	socket.emit('toggleSpeed');
+    }
+  </script>
+</body>
+</html>
